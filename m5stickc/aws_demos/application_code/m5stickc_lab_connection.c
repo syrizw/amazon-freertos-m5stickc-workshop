@@ -585,19 +585,27 @@ esp_err_t m5stickc_lab_connection_publish(IotMqttPublishInfo_t * publishInfo, Io
     int status = EXIT_SUCCESS;
     IotMqttError_t publishStatus = IOT_MQTT_STATUS_PENDING;
 
-    /* PUBLISH a message. This is an asynchronous function that notifies of
-    * completion through a callback. */
-    ESP_LOGI(TAG, "Publish: %s: %s", (char *)publishInfo->pTopicName, (char *)publishInfo->pPayload);
+	/* PUBLISH a message. This is an asynchronous function that notifies of
+	* completion through a callback. */
+	ESP_LOGI(TAG, "Publish: %s: %s", (char *)publishInfo->pTopicName, (char *)publishInfo->pPayload);
 
-    publishStatus = IotMqtt_Publish(_mqttConnection, publishInfo, 0, publishComplete, NULL);
+	if (NULL != _mqttConnection) {
+		publishStatus = IotMqtt_Publish(_mqttConnection, publishInfo, 0, publishComplete, NULL);
+	}
+	else
+	{
+		ESP_LOGE(TAG, "MQTT Connection is NULL.");
+		status = EXIT_FAILURE;
+	}
 
-    if (publishStatus != IOT_MQTT_STATUS_PENDING)
-    {
-        ESP_LOGE(TAG, "MQTT PUBLISH returned error %s.", IotMqtt_strerror(publishStatus));
-        status = EXIT_FAILURE;
-    }
+	if (publishStatus != IOT_MQTT_STATUS_PENDING)
+	{
+		ESP_LOGE(TAG, "MQTT PUBLISH returned error %s.", IotMqtt_strerror(publishStatus));
+		status = EXIT_FAILURE;
+	}
     
     return status;
+
 }
 /*-----------------------------------------------------------*/
 
